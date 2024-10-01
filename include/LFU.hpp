@@ -49,12 +49,9 @@ namespace cache
         }
         LFU_cache () {}
         public:
-        explicit LFU_cache (size_t sz) : sz_(sz)
-        {
-            // std::cerr << "sz_ = " << sz_ << std::endl;
-        }
+        explicit LFU_cache (size_t sz) : sz_(sz) {if (sz_ <= 0) sz_ = 5;}
         inline size_t size() const {return sz_;}
-        inline size_t set_size (size_t sz) {return sz_ = sz;}
+        inline size_t set_size (size_t sz) {if (sz > 0) sz_ = sz; return sz_}
 
         template <class F> bool lookup_update (keyT key, F slow_get_page)
         {
