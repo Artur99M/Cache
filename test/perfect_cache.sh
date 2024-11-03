@@ -1,18 +1,16 @@
 #!/bin/bash
-cat $2 | while read size push_number ref_output output_PC input
-do
-    echo "$size $push_number $input" >> $1/test/tstp.txt
-    $1/build/PC.out > $1/test/testp.txt 0< $1/test/tstp.txt
-    # echo "number = $number, size = $size, push_number = $push_number, input = $input, ref_output = $ref_output, real_output = $real_output"
-    read output 0< $1/test/testp.txt
-    echo "PERFECT CACHE TEST return $output"
-    rm $1/test/tstp.txt $1/test/testp.txt
-    if [[ output -ne output_PC ]]
-    then
-        echo "TEST FAIL: real = $output, ref = $output_PC"
-        exit 1
-    else
-        echo "TEST OK!"
-        exit 0
-    fi
-done
+
+touch $1/test/test.txt
+$1/build/PC.out 0< $2 > $1/test/test.txt
+read real_output 0< $1/test/test.txt
+read ref_output 0< $2PC.ans
+rm $1/test/test.txt
+# echo "number = $number, size = $size, push_number = $push_number, input = $input, ref_output = $ref_output, real_output = $real_output"
+if [[ ref_output -eq real_output ]]
+then
+    echo "TEST OK!"
+    exit 0
+else
+    echo "ERROR in test: ref = $ref_output, real = $real_output"
+    exit 1
+fi

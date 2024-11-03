@@ -1,5 +1,5 @@
 # rm -rf build
-# cmake -S . -B build
+# cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 # cmake --build build
 # for LFU tests:
 # cmake --build ./build --target test ARGS="-C LFU"

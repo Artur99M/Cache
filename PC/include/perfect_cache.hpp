@@ -1,4 +1,4 @@
-// #include <iostream>
+#include <iostream>
 #include <vector>
 #include <unordered_map>
 #include <list>
@@ -35,7 +35,9 @@ namespace cache
             {
                 size_t will_find;
                 if ((will_find = find (lookup, key)) == -1)
+                {
                     continue;
+                }
                 if (cache.size() < cache_size)
                 {
                     cache.emplace_front (std::make_pair (key, slow_get_page (key)));
@@ -51,10 +53,13 @@ namespace cache
                     if (x > out_val) out = i;
                     else if (x == -1) {out = i; break;}
                 }
-                hash.erase ((*i).first);
-                cache.erase (i);
-                cache.emplace_front (std::make_pair (key, slow_get_page (key)));
-                hash.emplace (key, cache.begin());
+                if (will_find != out_val)
+                {
+                    hash.erase ((*i).first);
+                    cache.erase (i);
+                    cache.emplace_front (std::make_pair (key, slow_get_page (key)));
+                    hash.emplace (key, cache.begin());
+                }
             }
         }
 

@@ -72,14 +72,11 @@ namespace cache
         template <class F> bool lookup_update (keyT key, F slow_get_page)
         {
             auto hit = hash_.find(key);
-            // std::cerr << "key = " << key << std::endl;
 
             if (hit == hash_.end())
             {
-                // std::cerr << "hit new elem\n";
                 if (sz_ == cache_.size())
                 {
-                    // std::cerr << "bark\n";
                     auto oit = elem_out ();
                     hash_.erase((*oit).key_); // for this line key_ was added in TK
                     cache_.erase (oit);
@@ -92,13 +89,10 @@ namespace cache
             }
             else
             {
-                auto hhit = hash_[key];
-                // std::cerr << "hit old elem\n";
-                TK elem = *(hhit);
-                cache_.erase (hhit);
-                ++(elem.n_used_);
-                cache_.emplace_front (elem);
-                hhit = cache_.begin();
+                auto eltit = hit->second;
+                if (eltit != cache_.begin())
+                    cache_.splice(cache_.begin(), cache_, eltit, std::next(eltit));
+                ++((*eltit).n_used_);
                 return true;
             }
         }
