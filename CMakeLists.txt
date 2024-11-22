@@ -12,18 +12,25 @@ cmake_minimum_required(VERSION 3.11)
 project(HWcache)
 set(LFU_SRC ${CMAKE_SOURCE_DIR}/LFU/src/LFU.cpp)
 set(PC_SRC ${CMAKE_SOURCE_DIR}/PC/src/perfect_cache.cpp)
+set(CMAKE_CXX_FLAGS_DEBUG "-Wall -Wextra -Wpedantic")
 
 set(LFU_exec LFU.out)
 add_executable(${LFU_exec})
 target_sources(${LFU_exec} PRIVATE ${LFU_SRC})
 target_compile_features(${LFU_exec} PUBLIC cxx_std_11)
 target_include_directories(${LFU_exec} PUBLIC ${CMAKE_SOURCE_DIR}/LFU/include)
+target_compile_definitions(${LFU_exec} PRIVATE
+    $<$<CONFIG:Debug>:DEBUG=1>
+)
 
 set(PC_exec PC.out)
 add_executable(${PC_exec})
 target_sources(${PC_exec} PRIVATE ${PC_SRC})
 target_compile_features(${PC_exec} PUBLIC cxx_std_11)
 target_include_directories(${PC_exec} PUBLIC ${CMAKE_SOURCE_DIR}/PC/include)
+target_compile_definitions(${PC_exec} PRIVATE
+    $<$<CONFIG:Debug>:DEBUG=1>
+)
 
 include(CTest)
 enable_testing()

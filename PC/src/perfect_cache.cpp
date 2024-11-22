@@ -14,14 +14,12 @@ int main() {
 
     std::cin >> m >> n;
     assert(std::cin.good());
-    std::vector<int> lookup;
+    int* lookup = new int[n]{};
     for (int i = 0; i < n; ++i)
     {
-        int x;
-        std::cin >> x;
+        std::cin >> lookup[i];
         assert (std::cin.good());
-        lookup.push_back(x);
     }
 
-    std::cout << cache::lookup_update_perfect(lookup, slow_get_page_int, m) << std::endl;
+    std::cout << cache::lookup_update_perfect(lookup, n ,slow_get_page_int, m) << std::endl;
 }
