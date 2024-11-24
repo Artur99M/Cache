@@ -12,7 +12,7 @@ cmake_minimum_required(VERSION 3.11)
 project(HWcache)
 set(LFU_SRC ${CMAKE_SOURCE_DIR}/LFU/src/LFU.cpp)
 set(PC_SRC ${CMAKE_SOURCE_DIR}/PC/src/perfect_cache.cpp)
-set(CMAKE_CXX_FLAGS_DEBUG "-Wall -Wextra -Wpedantic")
+set(CMAKE_CXX_FLAGS_DEBUG "-Wall -Wextra -Wpedantic -fsanitize=address -fsanitize=undefined -g")
 
 set(LFU_exec LFU.out)
 add_executable(${LFU_exec})
