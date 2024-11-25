@@ -1,7 +1,7 @@
 #include <cassert>
 #include <iostream>
 
-#include "../include/LFU.hpp"
+#include "LFU.hpp"
 
 // slow get page imitation
 int slow_get_page_int(int key) { return key; }
