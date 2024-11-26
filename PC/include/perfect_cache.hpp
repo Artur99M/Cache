@@ -58,43 +58,74 @@ namespace cache
         std::list<cache_part> cache_;
         using it = typename std::list<cache_part>::iterator;
         std::unordered_map<keyT, it> hash_;
+        std::unordered_map<keyT, std::vector<size_t>> lookup_;
     };
     size_t value = 0;
 
     PCache pcache;
+
+    for (size_t i = 0; i < n_hits; ++i)
+    {
+        debug << __LINE__ << ": find " << lookup[i] << ", i = " << i << '\n';
+        auto f = pcache.lookup_.find(lookup[i]);
+        if (f == pcache.lookup_.end())
+        {
+            debug << "no in lookup_\n";
+            std::vector<size_t> v = {i};
+            f = (pcache.lookup_.emplace (lookup[i], v)).first;
+            debug << "final of \"in\"\n";
+        }
+        else
+        {
+            debug << "in lookup_\n";
+            std::vector<size_t> & v = f->second;
+            v.back() = i;
+        }
+        (f->second).emplace_back(0xDEAD0BED);
+    }
+
+    debug << "end of building pcache.lookup_\n";
+
     auto out = pcache.cache_.end();
 
     for (size_t i_hit = 0; i_hit < n_hits; ++i_hit)
     {
         keyT hit = lookup[i_hit];
-        debug << "cache: ";
+        debug << i_hit << ":\ncache: ";
+        #ifdef DEBUG
         for (auto i =  pcache.cache_.begin(); i != pcache.cache_.end(); ++i)
         {
             debug << '{' << i->elem_ << ", " << i->next_using << "} ";
-            if (i->next_using != 0xDEAD0BED)
-                --(i->next_using);
         }
+        #endif
         debug << "\nhit = " << hit << '\n';
-        auto hhit = pcache.hash_.find(hit);
+        debug << "out = {" << out->elem_ << ", " << out->next_using << "}\n";
+        auto&& hhit = pcache.hash_.find(hit);
+
+        auto& v = pcache.lookup_.find(hit)->second;
+        v.erase (v.begin());
+        size_t next_using = v[0];
+        debug << "next_using = " << next_using << '\n';
+        for (size_t i = 0; i < v.size(); ++i)
+            debug << v[i] << ", ";
+        debug << '\n';
+
         if (hhit != pcache.hash_.end())
         {
             debug << "in cache\n";
             ++value;
-            auto chit = hhit->second;
-            chit->next_using = find (lookup + i_hit + 1, n_hits - i_hit - 1, hit);
+            auto& chit = hhit->second;
+            chit->next_using = next_using;
             if (chit->next_using > out->next_using) out = chit;
         }
         else
         {
-            size_t next_using = find(lookup + i_hit + 1, n_hits - i_hit - 1, hit);
             debug << "no in cache, next_using = ";
             if (next_using == 0xDEAD0BED)
             {
-                debug << reinterpret_cast<void*>(next_using) << '\n';
                 continue;
             }
-            else debug << next_using << '\n';
-            debug << "out = {" << out->elem_ << ", " << out->next_using << "}\n";
+            debug << next_using << '\n';
 
             if (pcache.cache_.size() < cache_size)
             {
