@@ -58,7 +58,7 @@ namespace cache
         std::list<cache_part> cache_;
         using it = typename std::list<cache_part>::iterator;
         std::unordered_map<keyT, it> hash_;
-        std::unordered_map<keyT, std::vector<size_t>> lookup_;
+        std::unordered_map<keyT, std::list<size_t>> lookup_;
     };
     size_t value = 0;
 
@@ -71,19 +71,22 @@ namespace cache
         if (f == pcache.lookup_.end())
         {
             debug << "no in lookup_\n";
-            std::vector<size_t> v = {i};
+            std::list<size_t> v = {i};
             f = (pcache.lookup_.emplace (lookup[i], v)).first;
             debug << "final of \"in\"\n";
         }
         else
         {
             debug << "in lookup_\n";
-            std::vector<size_t> & v = f->second;
-            v.back() = i;
+            // std::list<size_t> & v = f->second;
+            (f->second).emplace_back(i);
         }
-        (f->second).emplace_back(0xDEAD0BED);
     }
 
+    for (auto i = pcache.lookup_.begin(); i != pcache.lookup_.end(); ++i)
+    {
+        (i->second).emplace_back(0xDEAD0BED);
+    }
     debug << "end of building pcache.lookup_\n";
 
     auto out = pcache.cache_.end();
@@ -104,11 +107,11 @@ namespace cache
 
         auto& v = pcache.lookup_.find(hit)->second;
         v.erase (v.begin());
-        size_t next_using = v[0];
-        debug << "next_using = " << next_using << '\n';
-        for (size_t i = 0; i < v.size(); ++i)
-            debug << v[i] << ", ";
-        debug << '\n';
+        size_t next_using = *(v.begin());
+        // debug << "next_using = " << next_using << '\n';
+        // // for (size_t i = 0; i < v.size(); ++i)
+        // //     debug << v[i] << ", ";
+        // // debug << '\n';
 
         if (hhit != pcache.hash_.end())
         {
@@ -143,12 +146,6 @@ namespace cache
                 debug << "add elem in cache\n";
                 if (pcache.cache_.size() == cache_size)
                 {
-                    // out = pcache.cache_.begin();
-                    // for (auto i = pcache.cache_.begin(); i != pcache.cache_.end(); ++i)
-                    // {
-                    //     if (out->next_using > i->next_using)
-                    //         out = i;
-                    // }
                     pcache.hash_.erase(out->key_);
                     pcache.cache_.erase(out);
                 }
