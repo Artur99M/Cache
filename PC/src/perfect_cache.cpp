@@ -1,7 +1,7 @@
 #include <cassert>
 #include <iostream>
 
-#include "PC.hh"
+#include "perfect_cache.hpp"
 
 // slow get page imitation
 int slow_get_page_int(int key) { return key; }
